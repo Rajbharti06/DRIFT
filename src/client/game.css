@@ -1,0 +1,770 @@
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  padding: 0;
+  background: #0d1117;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  color: #e6edf3;
+}
+
+#app {
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+}
+
+#game-container {
+  width: 100%;
+  height: 100%;
+}
+
+/* ── Overlay for input forms ── */
+#drift-overlay {
+  position: absolute;
+  inset: 0;
+  background: #0d1117;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* flex-start + min-height on card = scrollable from top, no hidden content */
+  justify-content: flex-start;
+  padding: 20px 16px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  z-index: 10;
+  /* smooth momentum scroll on iOS */
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Push card to vertical center only when it fits; scroll when it doesn't */
+#drift-overlay::before {
+  content: '';
+  flex: 1 0 0;
+  max-height: 24px;
+}
+#drift-overlay::after {
+  content: '';
+  flex: 1 0 0;
+  max-height: 24px;
+}
+
+#drift-overlay.hidden { display: none; }
+
+.hidden { display: none !important; }
+
+.drift-card {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 12px;
+  padding: 28px 32px;
+  width: 100%;
+  max-width: 480px;
+}
+
+.drift-logo {
+  font-size: 28px;
+  font-weight: 900;
+  letter-spacing: 6px;
+  color: #ffd700;
+  text-align: center;
+  margin-bottom: 6px;
+}
+
+.drift-subtitle {
+  font-size: 12px;
+  color: #8b949e;
+  text-align: center;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 24px;
+}
+
+.drift-section-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #8b949e;
+  margin-bottom: 8px;
+}
+
+.drift-word-display {
+  background: #0d1117;
+  border: 2px solid #ffd700;
+  border-radius: 8px;
+  padding: 16px;
+  text-align: center;
+  font-size: 32px;
+  font-weight: 900;
+  letter-spacing: 6px;
+  color: #ffd700;
+  margin-bottom: 24px;
+  text-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+}
+
+.drift-clues-display {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.drift-clue-pill {
+  background: #21262d;
+  border: 1px solid #30363d;
+  border-radius: 20px;
+  padding: 8px 16px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #58a6ff;
+  letter-spacing: 1px;
+}
+
+.drift-input {
+  width: 100%;
+  background: #0d1117;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 16px; /* 16px prevents iOS auto-zoom on focus */
+  color: #e6edf3;
+  outline: none;
+  margin-bottom: 10px;
+  transition: border-color 0.2s;
+  font-family: inherit;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  touch-action: manipulation;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.drift-input:focus { border-color: #58a6ff; }
+.drift-input::placeholder { color: #30363d; text-transform: none; letter-spacing: 0; }
+
+.drift-input-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.drift-input-row .drift-input {
+  margin-bottom: 0;
+  text-align: center;
+}
+
+.drift-btn {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.1s;
+  font-family: inherit;
+  min-height: 48px;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.drift-btn:active { transform: scale(0.98); }
+.drift-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.drift-btn-primary {
+  background: #ffd700;
+  color: #0d1117;
+}
+
+.drift-btn-primary:hover:not(:disabled) { opacity: 0.9; }
+
+.drift-rule {
+  font-size: 12px;
+  color: #8b949e;
+  text-align: center;
+  margin-top: 12px;
+  line-height: 1.5;
+}
+
+.drift-error {
+  color: #f85149;
+  font-size: 13px;
+  text-align: center;
+  margin-top: 10px;
+  min-height: 18px;
+}
+
+.drift-progress {
+  height: 4px;
+  background: #21262d;
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.drift-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #3fb950, #ffd700);
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+.drift-stat-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  gap: 8px;
+}
+
+.drift-stat {
+  flex: 1;
+  background: #0d1117;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  padding: 10px;
+  text-align: center;
+}
+
+.drift-stat-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: #ffd700;
+}
+
+.drift-stat-label {
+  font-size: 10px;
+  color: #8b949e;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* ── Streak display ── */
+.drift-streak {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: linear-gradient(135deg, #1a1200, #2a1e00);
+  border: 1px solid #ffd700;
+  border-radius: 10px;
+  padding: 14px 20px;
+  margin-bottom: 16px;
+}
+
+.drift-streak-fire { font-size: 28px; }
+
+.drift-streak-count {
+  font-size: 36px;
+  font-weight: 900;
+  color: #ffd700;
+  line-height: 1;
+}
+
+.drift-streak-info { text-align: left; }
+
+.drift-streak-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #ffd700;
+}
+
+.drift-streak-sub {
+  font-size: 11px;
+  color: #8b949e;
+}
+
+/* ── Urgency bar ── */
+.drift-urgency {
+  background: #1a0a00;
+  border: 1px solid #e3b341;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.drift-urgency-dot {
+  width: 8px; height: 8px;
+  background: #e3b341;
+  border-radius: 50%;
+  animation: pulse-dot 1.2s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(1.4); }
+}
+
+.drift-urgency-text {
+  font-size: 13px;
+  color: #e3b341;
+  font-weight: 600;
+}
+
+/* ── Leaderboard ── */
+.drift-leaderboard { width: 100%; margin-bottom: 16px; }
+
+.drift-lb-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid #21262d;
+}
+
+.drift-lb-row:last-child { border-bottom: none; }
+
+.drift-lb-rank {
+  font-size: 12px;
+  font-weight: 700;
+  color: #8b949e;
+  width: 20px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.drift-lb-rank.gold { color: #ffd700; }
+.drift-lb-rank.silver { color: #c0c0c0; }
+.drift-lb-rank.bronze { color: #cd7f32; }
+
+.drift-lb-user {
+  flex: 1;
+  font-size: 13px;
+  color: #e6edf3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.drift-lb-user.you { color: #58a6ff; font-weight: 700; }
+
+.drift-lb-score {
+  font-size: 13px;
+  font-weight: 700;
+  color: #ffd700;
+  flex-shrink: 0;
+}
+
+.drift-lb-streak {
+  font-size: 11px;
+  color: #e3b341;
+  flex-shrink: 0;
+}
+
+/* ── Rank badge ── */
+.drift-rank-badge {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.drift-rank-number {
+  font-size: 48px;
+  font-weight: 900;
+  color: #58a6ff;
+  line-height: 1;
+}
+
+.drift-rank-label {
+  font-size: 11px;
+  color: #8b949e;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+/* ── Divider ── */
+.drift-divider {
+  border: none;
+  border-top: 1px solid #21262d;
+  margin: 16px 0;
+}
+
+/* ── Tab bar ── */
+.drift-tabs {
+  display: flex;
+  gap: 2px;
+  background: #0d1117;
+  border-radius: 8px;
+  padding: 3px;
+  margin-bottom: 16px;
+}
+
+.drift-tab {
+  flex: 1;
+  padding: 8px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: #8b949e;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+
+.drift-tab.active {
+  background: #161b22;
+  color: #e6edf3;
+}
+
+/* ── Score flash ── */
+.drift-score-flash {
+  text-align: center;
+  padding: 16px;
+  margin-bottom: 16px;
+  border-radius: 10px;
+}
+
+.drift-score-flash.strong {
+  background: rgba(63, 185, 80, 0.1);
+  border: 1px solid #3fb950;
+}
+
+.drift-score-flash.medium {
+  background: rgba(227, 179, 65, 0.1);
+  border: 1px solid #e3b341;
+}
+
+.drift-score-flash.weak {
+  background: rgba(248, 81, 73, 0.1);
+  border: 1px solid #f85149;
+}
+
+.drift-score-big {
+  font-size: 48px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.drift-score-flash.strong .drift-score-big { color: #3fb950; }
+.drift-score-flash.medium .drift-score-big { color: #e3b341; }
+.drift-score-flash.weak .drift-score-big { color: #f85149; }
+
+.drift-score-label {
+  font-size: 11px;
+  color: #8b949e;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+
+/* ── Mobile: narrow screens (≤ 480px) ── */
+@media (max-width: 480px) {
+  #drift-overlay {
+    padding: 12px 12px;
+  }
+
+  .drift-card {
+    padding: 18px 16px;
+    border-radius: 10px;
+  }
+
+  .drift-logo {
+    font-size: 22px;
+    letter-spacing: 4px;
+    margin-bottom: 4px;
+  }
+
+  .drift-subtitle {
+    font-size: 10px;
+    margin-bottom: 16px;
+  }
+
+  .drift-word-display {
+    font-size: 24px;
+    letter-spacing: 3px;
+    padding: 12px;
+    margin-bottom: 16px;
+  }
+
+  .drift-clues-display {
+    gap: 7px;
+    margin-bottom: 16px;
+  }
+
+  .drift-clue-pill {
+    font-size: 13px;
+    padding: 7px 12px;
+  }
+
+  .drift-input-row {
+    gap: 6px;
+  }
+
+  .drift-input-row .drift-input {
+    font-size: 14px;
+    padding: 10px 6px;
+    letter-spacing: 0;
+    text-align: center;
+  }
+
+  .drift-score-big { font-size: 40px; }
+  .drift-rank-number { font-size: 38px; }
+  .drift-streak-count { font-size: 28px; }
+  .drift-streak-fire { font-size: 22px; }
+
+  .drift-stat-row { gap: 6px; }
+  .drift-stat { padding: 8px 6px; }
+  .drift-stat-value { font-size: 16px; }
+  .drift-stat-label { font-size: 9px; }
+}
+
+/* ── Mobile: short screens (iframe height ≤ 540px) ── */
+@media (max-height: 540px) {
+  #drift-overlay {
+    padding: 8px 12px;
+  }
+
+  #drift-overlay::before,
+  #drift-overlay::after {
+    max-height: 6px;
+  }
+
+  .drift-card {
+    padding: 12px 14px;
+  }
+
+  .drift-logo { font-size: 18px; margin-bottom: 2px; }
+  .drift-subtitle { font-size: 9px; margin-bottom: 10px; letter-spacing: 1px; }
+
+  .drift-streak {
+    padding: 8px 12px;
+    margin-bottom: 8px;
+  }
+
+  .drift-streak-count { font-size: 26px; }
+  .drift-streak-fire { font-size: 20px; }
+  .drift-streak-label { font-size: 11px; }
+  .drift-streak-sub { font-size: 10px; }
+
+  .drift-urgency { padding: 7px 10px; margin-bottom: 8px; }
+  .drift-urgency-text { font-size: 11px; }
+
+  .drift-section-label { margin-bottom: 4px; font-size: 10px; }
+
+  .drift-word-display {
+    font-size: 20px;
+    letter-spacing: 3px;
+    padding: 10px;
+    margin-bottom: 12px;
+  }
+
+  .drift-clues-display { margin-bottom: 10px; }
+  .drift-clue-pill { font-size: 12px; padding: 6px 10px; }
+
+  .drift-input { padding: 10px 12px; margin-bottom: 7px; }
+
+  .drift-btn { padding: 11px; min-height: 42px; font-size: 13px; }
+
+  .drift-score-flash { padding: 10px; margin-bottom: 10px; }
+  .drift-score-big { font-size: 34px; }
+  .drift-rank-number { font-size: 32px; }
+  .drift-rank-badge { margin-bottom: 10px; }
+
+  .drift-stat-row { margin-bottom: 10px; }
+  .drift-stat { padding: 6px; }
+  .drift-stat-value { font-size: 15px; }
+
+  .drift-progress { margin-bottom: 10px; }
+  .drift-tabs { margin-bottom: 10px; }
+
+  .drift-lb-row { padding: 5px 0; }
+
+  .drift-rule { margin-top: 8px; font-size: 10px; }
+}
+
+/* ── Prevent iOS input zoom even at 14px ── */
+@supports (-webkit-touch-callout: none) {
+  .drift-input { font-size: 16px !important; }
+}
+
+/* ═══════════════════════════════════════════════════════
+   VISUAL POLISH — keyframes + refined component styles
+   ═══════════════════════════════════════════════════════ */
+
+/* ── Dot-grid overlay background ── */
+#drift-overlay {
+  background-image:
+    radial-gradient(circle, rgba(255, 215, 0, 0.025) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+/* ── Card entrance animation ── */
+@keyframes card-enter {
+  from { opacity: 0; transform: translateY(10px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0)    scale(1);    }
+}
+
+.drift-card {
+  animation: card-enter 0.22s ease-out both;
+}
+
+/* ── DRIFT logo glow pulse ── */
+@keyframes logo-glow {
+  0%, 100% { text-shadow: 0 0 16px rgba(255, 215, 0, 0.2); }
+  50%       { text-shadow: 0 0 40px rgba(255, 215, 0, 0.5), 0 0 80px rgba(255, 215, 0, 0.12); }
+}
+
+.drift-logo {
+  animation: logo-glow 3.5s ease-in-out infinite;
+}
+
+/* ── Progress bar shimmer ── */
+@keyframes shimmer {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(300%); }
+}
+
+.drift-progress-bar {
+  position: relative;
+  overflow: hidden;
+}
+
+.drift-progress-bar::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  width: 40%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
+  animation: shimmer 2.2s ease-in-out infinite;
+}
+
+/* ── Score flash entrance + glow ── */
+@keyframes score-enter {
+  0%   { opacity: 0; transform: scale(0.88); }
+  65%  { transform: scale(1.04); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+.drift-score-flash {
+  animation: score-enter 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.drift-score-flash.strong {
+  box-shadow: 0 0 28px rgba(63, 185, 80, 0.2);
+}
+
+.drift-score-flash.medium {
+  box-shadow: 0 0 28px rgba(227, 179, 65, 0.2);
+}
+
+.drift-score-flash.weak {
+  box-shadow: 0 0 28px rgba(248, 81, 73, 0.15);
+}
+
+/* ── Streak breathe when active ── */
+@keyframes streak-breathe {
+  0%, 100% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.08); }
+  50%       { box-shadow: 0 0 28px rgba(255, 215, 0, 0.2); }
+}
+
+.drift-streak {
+  animation: streak-breathe 2.8s ease-in-out infinite;
+}
+
+/* ── Word display glow ── */
+.drift-word-display {
+  box-shadow: 0 0 24px rgba(255, 215, 0, 0.12);
+  animation: logo-glow 4s ease-in-out infinite;
+}
+
+/* ── Urgency dot live indicator ── */
+@keyframes live-ring {
+  0%   { box-shadow: 0 0 0 0   rgba(227, 179, 65, 0.6); }
+  70%  { box-shadow: 0 0 0 8px rgba(227, 179, 65, 0);   }
+  100% { box-shadow: 0 0 0 0   rgba(227, 179, 65, 0);   }
+}
+
+.drift-urgency-dot {
+  animation: pulse-dot 1.2s ease-in-out infinite, live-ring 1.8s ease-out infinite;
+}
+
+/* ── Rank badge entrance ── */
+@keyframes rank-drop {
+  from { opacity: 0; transform: translateY(-12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.drift-rank-badge {
+  animation: rank-drop 0.35s 0.25s ease-out both;
+}
+
+/* ── Leaderboard row stagger ── */
+.drift-lb-row {
+  animation: card-enter 0.2s ease-out both;
+}
+
+.drift-lb-row:nth-child(1) { animation-delay: 0.05s; }
+.drift-lb-row:nth-child(2) { animation-delay: 0.10s; }
+.drift-lb-row:nth-child(3) { animation-delay: 0.15s; }
+.drift-lb-row:nth-child(4) { animation-delay: 0.20s; }
+.drift-lb-row:nth-child(5) { animation-delay: 0.25s; }
+.drift-lb-row:nth-child(n+6) { animation-delay: 0.30s; }
+
+/* ── Tab active underline slide ── */
+.drift-tab.active {
+  position: relative;
+}
+
+.drift-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 20%; right: 20%;
+  height: 2px;
+  background: #ffd700;
+  border-radius: 1px;
+}
+
+/* ── Chain progress bar glow ── */
+.drift-progress {
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.4);
+}
+
+/* ── Clue pills hover ── */
+.drift-clue-pill {
+  transition: background 0.15s, border-color 0.15s;
+}
+
+/* ── Input focus glow ── */
+.drift-input:focus {
+  border-color: #58a6ff;
+  box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.12);
+}
+
+/* ── Button shine ── */
+@keyframes btn-shine {
+  from { background-position: -200% center; }
+  to   { background-position: 200% center; }
+}
+
+.drift-btn-primary {
+  background: linear-gradient(
+    105deg,
+    #ffd700 0%,
+    #ffe84d 40%,
+    #ffd700 60%,
+    #ccac00 100%
+  );
+  background-size: 200% auto;
+  animation: btn-shine 3s linear infinite;
+}
+
+/* ── Stat card hover ── */
+.drift-stat {
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.drift-stat:hover {
+  border-color: #ffd700;
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.1);
+}

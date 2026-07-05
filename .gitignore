@@ -1,0 +1,5 @@
+node_modules
+.DS_Store
+dist
+.env
+screenshots/04-waiting-test.png

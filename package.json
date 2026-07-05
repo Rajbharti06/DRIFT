@@ -1,0 +1,40 @@
+{
+  "private": true,
+  "name": "drift-game",
+  "version": "0.0.0",
+  "license": "BSD-3-Clause",
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "deploy": "npm run type-check && npm run lint && devvit upload",
+    "dev": "devvit playtest",
+    "launch": "npm run deploy && devvit publish",
+    "lint": "eslint 'src/**/*.{ts,tsx}'",
+    "login": "devvit login",
+    "prettier": "prettier --write .",
+    "type-check": "tsc --build"
+  },
+  "engines": {
+    "node": ">=22.2.0"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.110.0",
+    "@devvit/start": "0.13.6",
+    "@devvit/web": "0.13.6",
+    "@hono/node-server": "2.0.6",
+    "devvit": "0.13.6",
+    "hono": "4.12.27",
+    "phaser": "4.2.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@types/node": "^22.19.19",
+    "eslint": "10.4.1",
+    "globals": "17.7.0",
+    "prettier": "3.8.4",
+    "puppeteer": "^25.3.0",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.60.1",
+    "vite": "8.1.0"
+  }
+}
