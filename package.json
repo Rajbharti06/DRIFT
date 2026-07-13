@@ -18,7 +18,7 @@
     "node": ">=22.2.0"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.110.0",
+    "@anthropic-ai/sdk": "^0.111.0",
     "@devvit/start": "0.13.6",
     "@devvit/web": "0.13.6",
     "@hono/node-server": "2.0.6",
